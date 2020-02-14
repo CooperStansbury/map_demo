@@ -40,7 +40,7 @@ sessionInfo()
 
 # Load Raw Data
 
-This data was available from: https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county/data with the following licesnse: CC0 1.0 Universal (CC0 1.0)
+This data was available from: https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county/data with the following license: CC0 1.0 Universal (CC0 1.0)
 
 ```{r Load Data}
 df <- read.csv("crime_data.csv")
@@ -101,7 +101,7 @@ map_obj <- append_data(us_states,
 
 Now we can plot this bad  boi!
 
-```{r Plot}
+```{r Plot 1}
 MURDER <- tm_shape(map_obj, projection = 2163) + 
   tm_polygons("MURDER",  
               title = "MURDER", 
