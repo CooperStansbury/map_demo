@@ -82,6 +82,8 @@ data <- df %>%
           dplyr::select(state_name, population, ARSON, ROBBERY, MURDER) %>%
           group_by(state_name) %>%
           summarise_all(sum)
+
+head(data)
 ```
 
 
