@@ -1,0 +1,112 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Resources
+
+Here are some links I found helpful:
+
+- https://www.computerworld.com/article/3175623/mapping-in-r-just-got-a-whole-lot-easier.html
+- https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html
+- http://zevross.com/blog/2018/10/02/creating-beautiful-demographic-maps-in-r-with-the-tidycensus-and-tmap-packages/
+- https://geocompr.robinlovelace.net/adv-map.html#introduction-5
+
+# Imports
+
+These are the libraries I'm using (I silence masking warnings):
+
+```{r Imports, message=TRUE, warning=TRUE, include=FALSE}
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(sf)
+library(raster)
+library(tmap)
+library(tmaptools)
+library(spData)
+library(spDataLarge)
+library(RColorBrewer)
+library(reshape2)
+```
+
+Show the current software versions I'm working with. 
+
+```{r Session Info}
+sessionInfo()
+```
+
+# Load Raw Data
+
+This data was available from: https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county/data with the following licesnse: CC0 1.0 Universal (CC0 1.0)
+
+```{r Load Data}
+df <- read.csv("crime_data_w_population_and_crime_rate.csv")
+head(df)
+```
+
+# Data Preparation
+
+Notice how the state name is part of the "county name" variable? I'll create a new column for the state name.
+
+```{r Extarct State Name}
+# note that we trim whitespace and explicitly convert
+# to a factor
+df$state_abbr <- as.factor(trimws(sub('.*,\\s*', '', df$county_name)))
+head(df)
+```
+
+But this gives us abbreviations, we really want the names. There's a file in this directory with the mapping.
+
+```{r Import State Names}
+states <- read.csv("state.csv")
+# note that we trim whitespace and explicitly convert
+# to a factor
+states$state_abbr <- as.factor(trimws(states$state_abbr))
+head(states)
+```
+
+We'll add the state names using a right join:
+
+```{r Add State Names}
+df <- merge(x = df, y = states, by = "state_abbr", all.x = TRUE)
+head(df)
+```
+
+Next we need some aggregates by state. I'll just take the sum here, but we could choose different functions if we wanted to.
+
+```{r Aggregate}
+data <- df %>%
+          dplyr::select(state_name, population, ARSON, ROBBERY, MURDER) %>%
+          group_by(state_name) %>%
+          summarise_all(sum)
+```
+
+
+
+# Maps!
+
+First we append our data into the map object. Note the warning that we only have data for the lower 48.
+
+```{r Build the Map}
+map_obj <- append_data(us_states, 
+                     data,
+                     key.shp = "NAME", 
+                     key.data = "state_name")
+```
+
+Now we can plot this bad  boi!
+
+```{r Plot}
+MURDER <- tm_shape(map_obj, projection = 2163) + 
+  tm_polygons("MURDER",  
+              title = "MURDER", 
+                id = "NAME",
+                legend.hist = TRUE,
+                palette = "PRGn") +
+    tm_style("col_blind", legend.outside=TRUE) + 
+    tm_layout(frame = FALSE)
+
+MURDER
+```
+
