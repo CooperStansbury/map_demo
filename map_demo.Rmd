@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 # Resources
@@ -41,7 +43,7 @@ sessionInfo()
 This data was available from: https://www.kaggle.com/mikejohnsonjr/united-states-crime-rates-by-county/data with the following licesnse: CC0 1.0 Universal (CC0 1.0)
 
 ```{r Load Data}
-df <- read.csv("crime_data_w_population_and_crime_rate.csv")
+df <- read.csv("crime_data.csv")
 head(df)
 ```
 
